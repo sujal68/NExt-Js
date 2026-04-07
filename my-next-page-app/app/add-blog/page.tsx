@@ -1,4 +1,49 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+
+
 export default function AddBlogForm() {
+
+    const blogCategory = ["Development", "AI Develoment", "Advoitijment", "Marketing", "Sports"]
+
+    const [blogData, setBlogData] = useState<blogDataType>({
+        blogTitle: "",
+        category: "",
+        authName: "",
+        blogTag: "",
+        sortExcerpt: "",
+        articalContent: "",
+    })
+
+
+    type blogDataType = {
+        blogTitle: string,
+        category: string,
+        authName: string,
+        blogTag: string,
+        sortExcerpt: string,
+        articalContent: string
+    }
+
+    const [allBlog, setAllBlog] = useState<blogDataType[]>(JSON.parse(localStorage.getItem('blog') || '[]'));
+
+    useEffect(() => {
+        if (allBlog) {
+            localStorage.setItem('blog', JSON.stringify(allBlog));
+        }
+
+    }, [allBlog]);
+
+    const onSubmit = (event: any) => {
+        event.preventDefault();
+
+        setAllBlog(blog => [...blog, blogData]);
+
+        toast.success("Blog Added Successfully");
+    }
+
     return (
         <div className="w-full max-w-4xl bg-white rounded-[2.5rem] p-8 md:p-14 shadow-sm border border-gray-100 font-sans mx-auto my-30">
 
@@ -15,7 +60,7 @@ export default function AddBlogForm() {
                 <p className="mt-3 text-gray-500">Draft your thoughts and prepare them for publishing.</p>
             </div>
 
-            <form className="flex flex-col gap-8">
+            <form onSubmit={onSubmit} className="flex flex-col gap-8">
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="flex flex-col gap-2">
@@ -37,9 +82,11 @@ export default function AddBlogForm() {
                                 className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] appearance-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300 cursor-pointer"
                             >
                                 <option value="" disabled>Select a category</option>
-                                <option value="development">Development</option>
-                                <option value="design">UI/UX Design</option>
-                                <option value="marketing">Marketing</option>
+                                {blogCategory.map((category) => (
+                                    <option key={category} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
                             </select>
                             <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
