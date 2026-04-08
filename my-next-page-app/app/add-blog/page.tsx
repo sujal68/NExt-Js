@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { blogDataType } from "../utils/type";
 
 
 export default function AddBlogForm() {
@@ -18,30 +19,71 @@ export default function AddBlogForm() {
     })
 
 
-    type blogDataType = {
-        blogTitle: string,
-        category: string,
-        authName: string,
-        blogTag: string,
-        sortExcerpt: string,
-        articalContent: string
-    }
 
-    const [allBlog, setAllBlog] = useState<blogDataType[]>(JSON.parse(localStorage.getItem('blog') || '[]'));
+    const [errorBlog, setErrorBlog] = useState<any>({});
+    const [allBlog, setAllBlog] = useState<blogDataType[]>([]);
 
     useEffect(() => {
-        if (allBlog) {
+        if (allBlog.length > 0) {
             localStorage.setItem('blog', JSON.stringify(allBlog));
         }
-
     }, [allBlog]);
+    useEffect(() => {
+        const storedBlog = localStorage.getItem('blog');
+        if (storedBlog) {
+            setAllBlog(JSON.parse(storedBlog));
+        }
+    }, []);
 
     const onSubmit = (event: any) => {
         event.preventDefault();
 
+        if (!validation()) {
+            return;
+        }
+
         setAllBlog(blog => [...blog, blogData]);
 
         toast.success("Blog Added Successfully");
+
+        setBlogData({
+            blogTitle: "",
+            category: "",
+            authName: "",
+            blogTag: "",
+            sortExcerpt: "",
+            articalContent: "",
+        });
+    }
+
+    const validation = () => {
+        const error: any = {};
+
+        if (!blogData.blogTitle) {
+            error.blogTitle = "Blog Title is required";
+        }
+        if (!blogData.category) {
+            error.category = "Category is required";
+        }
+        if (!blogData.authName) {
+            error.authName = "Author Name is required";
+        }
+        if (!blogData.articalContent) {
+            error.articalContent = "Article Content is required";
+        }
+        if (!blogData.sortExcerpt) {
+            error.sortExcerpt = "Short Excerpt is required";
+        }
+        if (blogData.sortExcerpt.length > 150) {
+            error.sortExcerpt = "Short Excerpt should be less than 150 characters";
+        }
+        if (!blogData.blogTag) {
+            error.blogTag = "Blog Tag is required";
+        }
+
+        setErrorBlog(error);
+
+        return Object.keys(error).length === 0;
     }
 
     return (
@@ -67,10 +109,15 @@ export default function AddBlogForm() {
                         <label className="text-sm font-semibold text-[#12121c] ml-1">Blog Title *</label>
                         <input
                             type="text"
-                            name="title"
+                            name="blogTitle"
+                            onChange={(e) => {
+                                setBlogData({ ...blogData, blogTitle: e.target.value })
+                            }}
+                            value={blogData.blogTitle}
                             placeholder="E.g., Master Next.js in 2026"
                             className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300"
                         />
+                        {errorBlog.blogTitle && <p className="text-red-500 text-sm ml-1">{errorBlog.blogTitle}</p>}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -78,16 +125,21 @@ export default function AddBlogForm() {
                         <div className="relative">
                             <select
                                 name="category"
-                                defaultValue=""
+                                onChange={(e) => {
+                                    setBlogData({ ...blogData, category: e.target.value })
+                                }}
+                                value={blogData.category}
                                 className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] appearance-none focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300 cursor-pointer"
                             >
-                                <option value="" disabled>Select a category</option>
+                                <option value="">Select a category</option>
                                 {blogCategory.map((category) => (
                                     <option key={category} value={category}>
                                         {category}
                                     </option>
                                 ))}
+
                             </select>
+                            {errorBlog.category && <p className="text-red-500 text-sm ml-1">{errorBlog.category}</p>}
                             <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                             </div>
@@ -100,43 +152,63 @@ export default function AddBlogForm() {
                         <label className="text-sm font-semibold text-[#12121c] ml-1">Author Name</label>
                         <input
                             type="text"
-                            name="author"
+                            name="authName"
+                            onChange={(e) => {
+                                setBlogData({ ...blogData, authName: e.target.value })
+                            }}
+                            value={blogData.authName}
                             placeholder="E.g., Sujal Kidecha"
                             className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300"
                         />
+                        {errorBlog.authName && <p className="text-red-500 text-sm ml-1">{errorBlog.authName}</p>}
                     </div>
 
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-semibold text-[#12121c] ml-1">Tags (Comma Separated)</label>
                         <input
                             type="text"
-                            name="tags"
+                            name="blogTag"
+                            onChange={(e) => {
+                                setBlogData({ ...blogData, blogTag: e.target.value })
+                            }}
+                            value={blogData.blogTag}
                             placeholder="e.g., frontend, react, web design"
                             className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300"
                         />
+                        {errorBlog.blogTag && <p className="text-red-500 text-sm ml-1">{errorBlog.blogTag}</p>}
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <label className="text-sm font-semibold text-[#12121c] ml-1">Short Excerpt</label>
                     <textarea
-                        name="excerpt"
+                        name="sortExcerpt"
+                        onChange={(e) => {
+                            setBlogData({ ...blogData, sortExcerpt: e.target.value })
+                        }}
+                        value={blogData.sortExcerpt}
                         placeholder="A quick summary of the blog post (max 150 characters)..."
                         className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300 resize-none"
                     ></textarea>
+                    {errorBlog.sortExcerpt && <p className="text-red-500 text-sm ml-1">{errorBlog.sortExcerpt}</p>}
                 </div>
 
                 <div className="flex flex-col gap-2">
                     <label className="text-sm font-semibold text-[#12121c] ml-1">Article Content *</label>
                     <textarea
-                        name="content"
+                        name="articalContent"
+                        onChange={(e) => {
+                            setBlogData({ ...blogData, articalContent: e.target.value })
+                        }}
+                        value={blogData.articalContent}
                         placeholder="Write your story here..."
                         className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300 resize-y"
                     ></textarea>
+                    {errorBlog.articalContent && <p className="text-red-500 text-sm ml-1">{errorBlog.articalContent}</p>}
                 </div>
 
                 <div className="mt-4 flex justify-end">
-                    <button type="button" className="bg-[#4f46e5] text-white pl-8 pr-2 py-2 rounded-full flex items-center gap-4 hover:scale-105 transition-transform duration-300 font-medium shadow-lg shadow-indigo-500/30 group">
+                    <button type="submit" className="bg-[#4f46e5] cursor-pointer text-white pl-8 pr-2 py-2 rounded-full flex items-center gap-4 hover:scale-105 transition-transform duration-300 font-medium shadow-lg shadow-indigo-500/30 group">
                         Publish Story
 
                         <div className="bg-white text-[#4f46e5] rounded-full p-2.5 group-hover:rotate-45 transition-transform duration-300">

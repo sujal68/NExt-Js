@@ -1,50 +1,44 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
-// Dummy Data
-const blogsData = [
-    {
-        id: 1,
-        title: "Mastering Next.js 15 in 2026",
-        category: "Development",
-        author: "Sujal Kidecha",
-        date: "Apr 02, 2026",
-        excerpt: "Discover the latest features, server components, and performance hacks in the newest Next.js update. Learn how to build faster and more scalable web applications."
-    },
-    {
-        id: 2,
-        title: "The Future of UI/UX: Bento Box Design",
-        category: "Design",
-        author: "Alex Designer",
-        date: "Mar 28, 2026",
-        excerpt: "Why asymmetric grids and soft corners are dominating the web design industry this year, and how you can implement them using Tailwind CSS."
-    },
-    {
-        id: 3,
-        title: "SEO Strategies that Actually Work",
-        category: "Marketing",
-        author: "Sarah Marketer",
-        date: "Mar 15, 2026",
-        excerpt: "Stop chasing algorithms. Focus on user intent and semantic HTML to rank higher seamlessly without relying on black-hat techniques."
-    },
-    {
-        id: 4,
-        title: "Building Scalable Backend Systems",
-        category: "Engineering",
-        author: "Sujal Kidecha",
-        date: "Mar 10, 2026",
-        excerpt: "A deep dive into microservices, database sharding, and caching for modern web applications handling millions of requests."
-    }
-];
 
 export default function BlogView() {
     const [viewType, setViewType] = useState("grid");
+
+    const [blogsData, setBlogsData] = useState<any[]>([]);
+
+    useEffect(() => {
+        const storedBlog = localStorage.getItem("blog");
+
+        if (storedBlog) {
+            const parsed = JSON.parse(storedBlog);
+
+            const formatted = parsed.map((item: any, index: number) => ({
+                id: index + 1,
+                title: item.blogTitle,
+                category: item.category,
+                author: item.authName,
+                date: new Date().toDateString(),
+                excerpt: item.sortExcerpt,
+            }));
+
+            setBlogsData(formatted.reverse());
+        }
+    }, []);
+
+    const deleteBlog = (id: number) => {
+        const updatedBlogs = blogsData.filter(blog => blog.id !== id);
+        setBlogsData(updatedBlogs);
+        localStorage.setItem("blog", JSON.stringify(updatedBlogs));
+
+        toast.success("Blog deleted successfully!");
+    }
 
     return (
         <section className="min-h-screen bg-[#f4f6fa] py-35 px-4 md:px-8 font-sans">
             <div className="max-w-7xl mx-auto w-full">
 
-                {/* ================= HEADER & CONTROLS ================= */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
                     <div>
                         <span className="text-indigo-600 text-sm font-bold tracking-widest uppercase mb-2 block">
@@ -79,7 +73,6 @@ export default function BlogView() {
                     </div>
                 </div>
 
-                {/* ================= 1. GRID VIEW ================= */}
                 {viewType === "grid" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
                         {blogsData.map((blog) => (
@@ -93,16 +86,15 @@ export default function BlogView() {
                                 <h3 className="text-2xl font-bold text-[#12121c] mb-4 leading-snug group-hover:text-indigo-600 transition-colors">{blog.title}</h3>
                                 <p className="text-gray-500 text-sm mb-8 flex-grow leading-relaxed">{blog.excerpt}</p>
 
-                                {/* Footer with Author and Actions */}
                                 <div className="flex justify-between items-center pt-6 border-t border-gray-100">
                                     <span className="text-sm font-semibold text-[#12121c]">{blog.author}</span>
                                     <div className="flex gap-2">
-                                        {/* Edit Button */}
                                         <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all" title="Edit">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         </button>
-                                        {/* Delete Button */}
-                                        <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all" title="Delete">
+                                        <button onClick={() => {
+                                            deleteBlog(blog.id)
+                                        }} className="p-2 cursor-pointer text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all" title="Delete">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                         </button>
                                     </div>
@@ -112,7 +104,6 @@ export default function BlogView() {
                     </div>
                 )}
 
-                {/* ================= 2. LIST VIEW ================= */}
                 {viewType === "list" && (
                     <div className="flex flex-col gap-5 animate-fade-in">
                         {blogsData.map((blog) => (
@@ -127,17 +118,16 @@ export default function BlogView() {
                                     <p className="text-gray-500 text-sm max-w-3xl leading-relaxed">{blog.excerpt}</p>
                                 </div>
 
-                                {/* Right Side: Author & Actions */}
                                 <div className="flex md:flex-col justify-between items-end md:min-w-[140px] pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 md:pl-6 mt-4 md:mt-0">
                                     <span className="text-sm font-semibold text-[#12121c] text-right w-full">{blog.author}</span>
 
                                     <div className="flex gap-2 md:mt-auto">
-                                        {/* Edit Pill Button */}
                                         <button className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full transition-colors flex items-center gap-2">
                                             Edit
                                         </button>
-                                        {/* Delete Pill Button */}
-                                        <button className="px-4 py-2 text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-full transition-colors flex items-center gap-2">
+                                        <button onClick={() => {
+                                            deleteBlog(blog.id)
+                                        }} className="px-4 py-2 cursor-pointer text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 rounded-full transition-colors flex items-center gap-2">
                                             Delete
                                         </button>
                                     </div>
@@ -148,7 +138,6 @@ export default function BlogView() {
                     </div>
                 )}
 
-                {/* ================= 3. TABLE VIEW ================= */}
                 {viewType === "table" && (
                     <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden animate-fade-in">
                         <div className="overflow-x-auto">
@@ -180,7 +169,9 @@ export default function BlogView() {
                                                     <button className="text-gray-400 hover:text-indigo-600 transition-colors" title="Edit">
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                                     </button>
-                                                    <button className="text-gray-400 hover:text-red-500 transition-colors" title="Delete">
+                                                    <button onClick={() => {
+                                                        deleteBlog(blog.id)
+                                                    }} className="text-gray-400 hover:text-red-500 cursor-pointer transition-colors" title="Delete">
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                                     </button>
                                                 </div>
