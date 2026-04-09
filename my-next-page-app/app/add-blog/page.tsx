@@ -10,6 +10,7 @@ export default function AddBlogForm() {
     const blogCategory = ["Development", "AI Develoment", "Advoitijment", "Marketing", "Sports"]
 
     const [blogData, setBlogData] = useState<blogDataType>({
+        id: 0,
         blogTitle: "",
         category: "",
         authName: "",
@@ -51,6 +52,7 @@ export default function AddBlogForm() {
         toast.success("Blog Added Successfully");
 
         setBlogData({
+            id: 0,
             blogTitle: "",
             category: "",
             authName: "",
