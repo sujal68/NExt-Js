@@ -15,7 +15,6 @@ export default function AddBlogForm() {
         authName: "",
         blogTag: "",
         sortExcerpt: "",
-        articalContent: "",
     })
 
 
@@ -42,7 +41,12 @@ export default function AddBlogForm() {
             return;
         }
 
-        setAllBlog(blog => [...blog, blogData]);
+        const newBlog = {
+            ...blogData,
+            id: Date.now()
+        }
+
+        setAllBlog(blog => [...blog, newBlog]);
 
         toast.success("Blog Added Successfully");
 
@@ -52,7 +56,6 @@ export default function AddBlogForm() {
             authName: "",
             blogTag: "",
             sortExcerpt: "",
-            articalContent: "",
         });
     }
 
@@ -67,9 +70,6 @@ export default function AddBlogForm() {
         }
         if (!blogData.authName) {
             error.authName = "Author Name is required";
-        }
-        if (!blogData.articalContent) {
-            error.articalContent = "Article Content is required";
         }
         if (!blogData.sortExcerpt) {
             error.sortExcerpt = "Short Excerpt is required";
@@ -193,19 +193,7 @@ export default function AddBlogForm() {
                     {errorBlog.sortExcerpt && <p className="text-red-500 text-sm ml-1">{errorBlog.sortExcerpt}</p>}
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    <label className="text-sm font-semibold text-[#12121c] ml-1">Article Content *</label>
-                    <textarea
-                        name="articalContent"
-                        onChange={(e) => {
-                            setBlogData({ ...blogData, articalContent: e.target.value })
-                        }}
-                        value={blogData.articalContent}
-                        placeholder="Write your story here..."
-                        className="w-full bg-[#f4f6fa] border border-transparent px-5 py-4 rounded-2xl text-[#12121c] placeholder-gray-400 focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all duration-300 resize-y"
-                    ></textarea>
-                    {errorBlog.articalContent && <p className="text-red-500 text-sm ml-1">{errorBlog.articalContent}</p>}
-                </div>
+
 
                 <div className="mt-4 flex justify-end">
                     <button type="submit" className="bg-[#4f46e5] cursor-pointer text-white pl-8 pr-2 py-2 rounded-full flex items-center gap-4 hover:scale-105 transition-transform duration-300 font-medium shadow-lg shadow-indigo-500/30 group">

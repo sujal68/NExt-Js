@@ -1,39 +1,31 @@
 "use client";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-
+import { useRouter } from "next/navigation";
 
 export default function BlogView() {
-    const [viewType, setViewType] = useState("grid");
 
+    const [viewType, setViewType] = useState("grid");
     const [blogsData, setBlogsData] = useState<any[]>([]);
+
+    const router = useRouter();
 
     useEffect(() => {
         const storedBlog = localStorage.getItem("blog");
 
         if (storedBlog) {
-            const parsed = JSON.parse(storedBlog);
-
-            const formatted = parsed.map((item: any, index: number) => ({
-                id: index + 1,
-                title: item.blogTitle,
-                category: item.category,
-                author: item.authName,
-                date: new Date().toDateString(),
-                excerpt: item.sortExcerpt,
-            }));
-
-            setBlogsData(formatted.reverse());
+            setBlogsData(JSON.parse(storedBlog));
         }
     }, []);
 
     const deleteBlog = (id: number) => {
         const updatedBlogs = blogsData.filter(blog => blog.id !== id);
+
         setBlogsData(updatedBlogs);
         localStorage.setItem("blog", JSON.stringify(updatedBlogs));
 
         toast.success("Blog deleted successfully!");
-    }
+    };
 
     return (
         <section className="min-h-screen bg-[#f4f6fa] py-35 px-4 md:px-8 font-sans">
@@ -75,21 +67,23 @@ export default function BlogView() {
 
                 {viewType === "grid" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-                        {blogsData.map((blog) => (
-                            <div key={blog.id} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group">
+                        {blogsData.map((blog, index) => (
+                            <div key={index} className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col group">
 
                                 <div className="flex justify-between items-start mb-6">
                                     <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{blog.category}</span>
                                     <span className="text-xs text-gray-400 font-medium">{blog.date}</span>
                                 </div>
 
-                                <h3 className="text-2xl font-bold text-[#12121c] mb-4 leading-snug group-hover:text-indigo-600 transition-colors">{blog.title}</h3>
-                                <p className="text-gray-500 text-sm mb-8 flex-grow leading-relaxed">{blog.excerpt}</p>
+                                <h3 className="text-2xl font-bold text-[#12121c] mb-4 leading-snug group-hover:text-indigo-600 transition-colors">{blog.blogTitle}</h3>
+                                <p className="text-gray-500 text-sm mb-8 flex-grow leading-relaxed">{blog.sortExcerpt}</p>
 
                                 <div className="flex justify-between items-center pt-6 border-t border-gray-100">
-                                    <span className="text-sm font-semibold text-[#12121c]">{blog.author}</span>
+                                    <span className="text-sm font-semibold text-[#12121c]">{blog.authName}</span>
                                     <div className="flex gap-2">
-                                        <button className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all" title="Edit">
+                                        <button onClick={() => {
+                                            router.push(`/editBlog/${blog.id}`);
+                                        }} className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-all" title="Edit">
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         </button>
                                         <button onClick={() => {
@@ -106,23 +100,25 @@ export default function BlogView() {
 
                 {viewType === "list" && (
                     <div className="flex flex-col gap-5 animate-fade-in">
-                        {blogsData.map((blog) => (
-                            <div key={blog.id} className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row justify-between gap-6 group">
+                        {blogsData.map((blog, index) => (
+                            <div key={index} className="bg-white rounded-[2rem] p-6 md:p-8 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col md:flex-row justify-between gap-6 group">
 
                                 <div className="flex-grow">
                                     <div className="flex items-center gap-4 mb-3">
                                         <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{blog.category}</span>
                                         <span className="text-xs text-gray-400 font-medium">{blog.date}</span>
                                     </div>
-                                    <h3 className="text-2xl md:text-3xl font-bold text-[#12121c] mb-3 leading-tight group-hover:text-indigo-600 transition-colors">{blog.title}</h3>
-                                    <p className="text-gray-500 text-sm max-w-3xl leading-relaxed">{blog.excerpt}</p>
+                                    <h3 className="text-2xl md:text-3xl font-bold text-[#12121c] mb-3 leading-tight group-hover:text-indigo-600 transition-colors">{blog.blogTitle}</h3>
+                                    <p className="text-gray-500 text-sm max-w-3xl leading-relaxed">{blog.sortExcerpt}</p>
                                 </div>
 
                                 <div className="flex md:flex-col justify-between items-end md:min-w-[140px] pt-4 md:pt-0 border-t md:border-t-0 md:border-l border-gray-100 md:pl-6 mt-4 md:mt-0">
-                                    <span className="text-sm font-semibold text-[#12121c] text-right w-full">{blog.author}</span>
+                                    <span className="text-sm font-semibold text-[#12121c] text-right w-full">{blog.authName}</span>
 
                                     <div className="flex gap-2 md:mt-auto">
-                                        <button className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full transition-colors flex items-center gap-2">
+                                        <button onClick={() => {
+                                            router.push(`/editBlog/${blog.id}`);
+                                        }} className="px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-full transition-colors flex items-center gap-2">
                                             Edit
                                         </button>
                                         <button onClick={() => {
@@ -152,21 +148,23 @@ export default function BlogView() {
                                     </tr>
                                 </thead>
                                 <tbody className="text-sm text-gray-600 divide-y divide-gray-100">
-                                    {blogsData.map((blog) => (
-                                        <tr key={blog.id} className="hover:bg-gray-50 transition-colors duration-200 group">
+                                    {blogsData.map((blog, index) => (
+                                        <tr key={index} className="hover:bg-gray-50 transition-colors duration-200 group">
                                             <td className="px-6 py-5 font-semibold text-[#12121c] group-hover:text-indigo-600 transition-colors max-w-xs truncate">
-                                                {blog.title}
+                                                {blog.blogTitle}
                                             </td>
                                             <td className="px-6 py-5">
                                                 <span className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase">
                                                     {blog.category}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-5 font-medium">{blog.author}</td>
+                                            <td className="px-6 py-5 font-medium">{blog.authName}</td>
                                             <td className="px-6 py-5">{blog.date}</td>
                                             <td className="px-6 py-5">
                                                 <div className="flex justify-end gap-3">
-                                                    <button className="text-gray-400 hover:text-indigo-600 transition-colors" title="Edit">
+                                                    <button onClick={() => {
+                                                        router.push(`/editBlog/${blog.id}`);
+                                                    }} className="text-gray-400 hover:text-indigo-600 transition-colors" title="Edit">
                                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                                     </button>
                                                     <button onClick={() => {

@@ -4,5 +4,4 @@ export type blogDataType = {
     authName: string,
     blogTag: string,
     sortExcerpt: string,
-    articalContent: string
 }
